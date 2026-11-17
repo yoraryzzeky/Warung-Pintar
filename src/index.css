@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  --wp-bg: #f8fafc;
+}
+
+:root[data-theme="warung"] {
+  --wp-bg: #fffaf5;
+  --color-blue-50: #fff7ed;
+  --color-blue-100: #ffedd5;
+  --color-blue-200: #fed7aa;
+  --color-blue-300: #fdba74;
+  --color-blue-400: #fb923c;
+  --color-blue-500: #f97316;
+  --color-blue-600: #ea580c;
+  --color-blue-700: #c2410c;
+  --color-blue-800: #9a3412;
+  --color-blue-900: #7c2d12;
+  --color-indigo-50: #fffbeb;
+  --color-indigo-100: #fef3c7;
+  --color-indigo-200: #fde68a;
+  --color-indigo-400: #fbbf24;
+  --color-indigo-500: #f59e0b;
+  --color-indigo-600: #d97706;
+  --color-indigo-700: #b45309;
+  --color-indigo-900: #78350f;
+}
+
+:root[data-theme="emerald"] {
+  --wp-bg: #f4fbf7;
+  --color-blue-50: #ecfdf5;
+  --color-blue-100: #d1fae5;
+  --color-blue-200: #a7f3d0;
+  --color-blue-300: #6ee7b7;
+  --color-blue-400: #34d399;
+  --color-blue-500: #10b981;
+  --color-blue-600: #059669;
+  --color-blue-700: #047857;
+  --color-blue-800: #065f46;
+  --color-blue-900: #064e3b;
+  --color-indigo-50: #f0fdfa;
+  --color-indigo-100: #ccfbf1;
+  --color-indigo-200: #99f6e4;
+  --color-indigo-400: #2dd4bf;
+  --color-indigo-500: #14b8a6;
+  --color-indigo-600: #0d9488;
+  --color-indigo-700: #0f766e;
+  --color-indigo-900: #134e4a;
+}
+
+:root[data-theme="royal"] {
+  --wp-bg: #f8f6fc;
+  --color-blue-50: #f5f3ff;
+  --color-blue-100: #ede9fe;
+  --color-blue-200: #ddd6fe;
+  --color-blue-300: #c4b5fd;
+  --color-blue-400: #a78bfa;
+  --color-blue-500: #8b5cf6;
+  --color-blue-600: #7c3aed;
+  --color-blue-700: #6d28d9;
+  --color-blue-800: #5b21b6;
+  --color-blue-900: #4c1d95;
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+  --color-indigo-900: #312e81;
+}
+
+:root[data-theme="crimson"] {
+  --wp-bg: #fff8f9;
+  --color-blue-50: #fff1f2;
+  --color-blue-100: #ffe4e6;
+  --color-blue-200: #fecdd3;
+  --color-blue-300: #fda4af;
+  --color-blue-400: #fb7185;
+  --color-blue-500: #f43f5e;
+  --color-blue-600: #e11d48;
+  --color-blue-700: #be123c;
+  --color-blue-800: #9f1239;
+  --color-blue-900: #881337;
+  --color-indigo-50: #fdf2f8;
+  --color-indigo-100: #fce7f3;
+  --color-indigo-200: #fbcfe8;
+  --color-indigo-400: #f472b6;
+  --color-indigo-500: #ec4899;
+  --color-indigo-600: #db2777;
+  --color-indigo-700: #be185d;
+  --color-indigo-900: #831843;
+}
+
