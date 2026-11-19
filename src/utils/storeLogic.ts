@@ -3,6 +3,8 @@
  * Decoupled pure logic for financial calculations, inventory conversions, and aggregations.
  */
 
+import { generateUniqueRecordId } from './firestorePayload';
+
 export interface CartItem {
   cartId: string;
   id: string;
@@ -46,6 +48,7 @@ export interface DailyFinancialPoint {
   label: string;
   omset: number;
   laba: number;
+  expenses: number;
   retail: number;
   digital: number;
   retailProfit: number;
@@ -105,6 +108,30 @@ export interface DigitalTransaction {
   paymentMethod?: PaymentMethodType;
   handledBy?: string;
 }
+
+export type ExpensePaymentSource = 'LACI_KAS' | 'NON_TUNAI';
+
+export interface Expense {
+  id: string;
+  date: string;
+  category: string;
+  description: string;
+  amount: number;
+  source: ExpensePaymentSource;
+  handledBy: string;
+}
+
+export const EXPENSE_CATEGORIES = [
+  'Listrik & Token',
+  'Transport & Bensin',
+  'Perlengkapan & Plastik',
+  'Konsumsi & Minum',
+  'Kebersihan & Keamanan',
+  'Pemeliharaan',
+  'Lain-lain',
+] as const;
+
+export type ExpenseCategory = typeof EXPENSE_CATEGORIES[number];
 
 export const CATEGORIES = [
   'Sembako',
@@ -208,7 +235,8 @@ export const aggregateDailyRecap = (
   transactions: Transaction[],
   digitalTransactions: DigitalTransaction[],
   startDate?: string,
-  endDate?: string
+  endDate?: string,
+  expenses: Expense[] = []
 ) => {
   const map: Record<
     string,
@@ -218,57 +246,113 @@ export const aggregateDailyRecap = (
       retailProfit: number;
       digitalOmset: number;
       digitalProfit: number;
+      expensesAmount: number;
+      totalOmset: number;
+      totalProfit: number;
       count: number;
     }
   > = {};
 
-  const start = startDate ? new Date(startDate) : new Date(0);
-  const end = endDate ? new Date(endDate) : new Date();
-  end.setHours(23, 59, 59, 999);
+  const startKey = startDate ? startDate.split('T')[0] : '';
+  const endKey = endDate ? endDate.split('T')[0] : '';
+  const inRange = (dateStr?: string): string | null => {
+    if (!dateStr) return null;
+    const key = dateStr.split('T')[0];
+    if (!key) return null;
+    if (startKey && key < startKey) return null;
+    if (endKey && key > endKey) return null;
+    return key;
+  };
+
+  const ensureRow = (dateKey: string) => {
+    if (!map[dateKey]) {
+      map[dateKey] = {
+        date: dateKey,
+        retailOmset: 0,
+        retailProfit: 0,
+        digitalOmset: 0,
+        digitalProfit: 0,
+        expensesAmount: 0,
+        totalOmset: 0,
+        totalProfit: 0,
+        count: 0,
+      };
+    }
+    return map[dateKey];
+  };
 
   transactions
     .filter((t) => t.status === 'LUNAS' && !t.isCancelled)
     .forEach((tx) => {
-      const d = new Date(tx.date);
-      if (d >= start && d <= end) {
-        const dateKey = tx.date.split('T')[0];
-        if (!map[dateKey]) {
-          map[dateKey] = {
-            date: dateKey,
-            retailOmset: 0,
-            retailProfit: 0,
-            digitalOmset: 0,
-            digitalProfit: 0,
-            count: 0,
-          };
-        }
-        map[dateKey].retailOmset += Number(tx.totalAmount) || 0;
-        map[dateKey].retailProfit += Number(tx.totalProfit) || 0;
-        map[dateKey].count += 1;
+      const dateKey = inRange(tx.date);
+      if (dateKey) {
+        const row = ensureRow(dateKey);
+        row.retailOmset += Number(tx.totalAmount) || 0;
+        row.retailProfit += Number(tx.totalProfit) || 0;
+        row.count += 1;
       }
     });
 
   digitalTransactions.forEach((tx) => {
-    const d = new Date(tx.date);
-    if (d >= start && d <= end) {
-      const dateKey = tx.date.split('T')[0];
-      if (!map[dateKey]) {
-        map[dateKey] = {
-          date: dateKey,
-          retailOmset: 0,
-          retailProfit: 0,
-          digitalOmset: 0,
-          digitalProfit: 0,
-          count: 0,
-        };
-      }
-      map[dateKey].digitalOmset += Number(tx.sellAmount) || 0;
-      map[dateKey].digitalProfit += Number(tx.fee) || 0;
-      map[dateKey].count += 1;
+    const dateKey = inRange(tx.date);
+    if (dateKey) {
+      const row = ensureRow(dateKey);
+      row.digitalOmset += Number(tx.sellAmount) || 0;
+      row.digitalProfit += Number(tx.fee) || 0;
+      row.count += 1;
     }
   });
 
+  (expenses || []).forEach((exp) => {
+    const dateKey = inRange(exp.date);
+    if (dateKey) {
+      const row = ensureRow(dateKey);
+      row.expensesAmount += Math.max(0, Number(exp.amount) || 0);
+    }
+  });
+
+  Object.values(map).forEach((row) => {
+    row.totalOmset = row.retailOmset + row.digitalOmset - row.expensesAmount;
+    row.totalProfit = row.retailProfit + row.digitalProfit - row.expensesAmount;
+  });
+
   return Object.values(map).sort((a, b) => b.date.localeCompare(a.date));
+};
+
+/**
+ * Calculates total expenses and breakdowns by payment source (Laci Kas vs Non Tunai).
+ */
+export const calculateTotalExpenses = (
+  expenses: Expense[] = [],
+  startDate?: string,
+  endDate?: string,
+  sourceFilter?: ExpensePaymentSource
+): { total: number; cashDrawerTotal: number; nonCashTotal: number; count: number } => {
+  let total = 0;
+  let cashDrawerTotal = 0;
+  let nonCashTotal = 0;
+  let count = 0;
+
+  const startKey = startDate ? startDate.split('T')[0] : '';
+  const endKey = endDate ? endDate.split('T')[0] : '';
+
+  (expenses || []).forEach((exp) => {
+    if (!exp.date) return;
+    const dateKey = exp.date.split('T')[0];
+    if (startKey && dateKey < startKey) return;
+    if (endKey && dateKey > endKey) return;
+    if (sourceFilter && exp.source !== sourceFilter) return;
+    const amt = Math.max(0, Number(exp.amount) || 0);
+    total += amt;
+    count += 1;
+    if (exp.source === 'LACI_KAS') {
+      cashDrawerTotal += amt;
+    } else {
+      nonCashTotal += amt;
+    }
+  });
+
+  return { total, cashDrawerTotal, nonCashTotal, count };
 };
 
 /**
@@ -303,13 +387,16 @@ export const getLowStockRecommendations = (
 export const buildLast30DaysFinancialSeries = (
   transactions: Transaction[],
   digitalTransactions: DigitalTransaction[],
+  expensesOrRef: Expense[] | Date = [],
   referenceDate: Date = new Date()
 ): DailyFinancialPoint[] => {
+  const expenses = Array.isArray(expensesOrRef) ? expensesOrRef : [];
+  const refDate = expensesOrRef instanceof Date ? expensesOrRef : referenceDate;
   const series: DailyFinancialPoint[] = [];
 
   for (let i = 29; i >= 0; i--) {
-    const d = new Date(referenceDate);
-    d.setDate(referenceDate.getDate() - i);
+    const d = new Date(refDate);
+    d.setDate(refDate.getDate() - i);
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
@@ -324,15 +411,21 @@ export const buildLast30DaysFinancialSeries = (
     const digitalOmset = digTxs.reduce((sum, t) => sum + (Number(t.sellAmount) || 0), 0);
     const digitalProfit = digTxs.reduce((sum, t) => sum + (Number(t.fee) || 0), 0);
 
-    const omset = retailOmset + digitalOmset;
-    const laba = retailProfit + digitalProfit;
-    const marginPercent = omset > 0 ? Number(((laba / omset) * 100).toFixed(1)) : 0;
+    const dayExpenses = expenses
+      .filter((e) => e.date && e.date.startsWith(dateStr))
+      .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+    const grossOmset = retailOmset + digitalOmset;
+    const omset = grossOmset - dayExpenses;
+    const laba = retailProfit + digitalProfit - dayExpenses;
+    const marginPercent = grossOmset > 0 ? Number(((laba / grossOmset) * 100).toFixed(1)) : 0;
 
     series.push({
       date: dateStr,
       label,
       omset,
       laba,
+      expenses: dayExpenses,
       retail: retailOmset,
       digital: digitalOmset,
       retailProfit,
@@ -560,7 +653,7 @@ export const applyReturnOrExchange = ({
   }
 
   const record: ReturnExchangeRecord = {
-    id: `RET-${Date.now().toString().slice(-6)}`,
+    id: generateUniqueRecordId('RET'),
     date: new Date().toISOString(),
     action: isFullyCancelled && action !== 'EXCHANGE' ? 'CANCEL' : action,
     reason: reason.trim() || (action === 'EXCHANGE' ? 'Tukar Barang' : 'Pembatalan / Retur'),

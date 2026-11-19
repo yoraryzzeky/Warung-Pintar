@@ -20,7 +20,7 @@ export const PpobSuccessToast: React.FC<PpobSuccessToastProps> = ({
 
   return (
     <div
-      className="fixed top-3 right-3 left-3 sm:left-auto sm:top-5 sm:right-5 sm:w-[380px] z-[150] pointer-events-none"
+      className="fixed top-2 right-2 left-2 sm:left-auto sm:top-5 sm:right-5 sm:w-[370px] phone-landscape:w-[320px] phone-landscape:left-auto phone-landscape:top-2 z-[150] pointer-events-none"
       aria-live="polite"
       aria-atomic="true"
     >
@@ -47,9 +47,9 @@ export const PpobSuccessToast: React.FC<PpobSuccessToastProps> = ({
             }}
             className="pointer-events-auto relative overflow-hidden rounded-2xl bg-white/95 backdrop-blur-md border border-emerald-200 shadow-[0_18px_40px_-12px_rgba(15,23,42,0.22)] text-slate-900"
           >
-            <div className="p-4 flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <CheckCircle size={20} aria-hidden="true" />
+            <div className="p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <CheckCircle size={18} aria-hidden="true" />
               </div>
 
               <div className="min-w-0 flex-1">

@@ -9,6 +9,9 @@ export const STORAGE_KEYS = {
   ROLE_SETTINGS: 'wp_offline_role_settings',
   THEME: 'wp_offline_theme',
   SOUND_ENABLED: 'wp_offline_sound_enabled',
+  EXPENSES: 'wp_offline_expenses',
+  NOTIFICATIONS: 'wp_offline_owner_notifications',
+  CLOSING_RECORDS: 'wp_offline_closing_records',
 } as const;
 
 export interface KasirDraft {
@@ -108,6 +111,9 @@ export function clearAllStoreStorage(storage: StorageLike | null = getDefaultSto
     storage.removeItem(STORAGE_KEYS.ROLE_SETTINGS);
     storage.removeItem(STORAGE_KEYS.THEME);
     storage.removeItem(STORAGE_KEYS.SOUND_ENABLED);
+    storage.removeItem(STORAGE_KEYS.EXPENSES);
+    storage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
+    storage.removeItem(STORAGE_KEYS.CLOSING_RECORDS);
   } catch {
     // Ignore storage removal errors in restricted modes
   }

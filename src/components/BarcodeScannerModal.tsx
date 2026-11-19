@@ -224,20 +224,20 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/75 z-[130] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 bg-black/75 z-[130] flex items-center justify-center p-2.5 sm:p-4 backdrop-blur-sm animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
-      <div className="bg-white rounded-[2rem] w-full max-w-md p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+      <div className="bg-white rounded-2xl sm:rounded-[2rem] w-full max-w-md phone-landscape:max-w-xl p-4 sm:p-6 space-y-3 sm:space-y-4 shadow-2xl border border-slate-100 max-h-[90dvh] overflow-y-auto custom-scrollbar">
+        <div className="flex items-start justify-between gap-2.5 sm:gap-3 border-b border-slate-100 pb-2.5 sm:pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
-              <ScanBarcode size={20} />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 text-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+              <ScanBarcode size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-black text-slate-900 uppercase">{title}</h3>
-              <p className="text-[10px] font-bold text-slate-500 mt-0.5">{subtitle}</p>
+              <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase">{title}</h3>
+              <p className="text-[9.5px] sm:text-[10px] font-bold text-slate-500 mt-0.5 line-clamp-2">{subtitle}</p>
             </div>
           </div>
           <button
@@ -254,7 +254,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
         </div>
 
         {/* Camera Viewfinder / Activation Area */}
-        <div className="relative bg-slate-950 rounded-2xl overflow-hidden aspect-video flex items-center justify-center border border-slate-800">
+        <div className="relative bg-slate-950 rounded-xl sm:rounded-2xl overflow-hidden aspect-video max-h-[190px] sm:max-h-[240px] phone-landscape:max-h-[135px] w-full flex items-center justify-center border border-slate-800">
           <video
             ref={videoRef}
             playsInline
@@ -276,7 +276,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
                   stopScanner();
                   setCameraStatus('idle');
                 }}
-                className="absolute bottom-2.5 right-2.5 px-3 py-1.5 bg-black/70 hover:bg-black text-white rounded-lg text-[10px] font-black uppercase flex items-center gap-1"
+                className="absolute bottom-2 right-2 px-2.5 py-1 bg-black/70 hover:bg-black text-white rounded-lg text-[10px] font-black uppercase flex items-center gap-1"
               >
                 <VideoOff size={12} /> Matikan Kamera
               </button>
@@ -284,15 +284,15 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
           )}
 
           {cameraStatus === 'idle' && (
-            <div className="p-5 text-center space-y-3">
-              <Camera size={28} className="text-blue-400 mx-auto" />
-              <p className="text-[11px] font-bold text-slate-300 leading-relaxed">
-                Siap memindai via alat scanner USB/Bluetooth di bawah, atau aktifkan kamera HP untuk scan barcode kemasan.
+            <div className="p-3 sm:p-5 text-center space-y-2 sm:space-y-3">
+              <Camera size={24} className="text-blue-400 mx-auto" />
+              <p className="text-[10px] sm:text-[11px] font-bold text-slate-300 leading-snug">
+                Siap memindai via scanner USB/Bluetooth, atau aktifkan kamera HP untuk scan barcode kemasan.
               </p>
               <button
                 type="button"
                 onClick={startCameraScan}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase inline-flex items-center gap-1.5 shadow-md transition-all"
+                className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10.5px] sm:text-[11px] font-black uppercase inline-flex items-center gap-1.5 shadow-md transition-all"
               >
                 <Camera size={14} /> Aktifkan Kamera HP
               </button>

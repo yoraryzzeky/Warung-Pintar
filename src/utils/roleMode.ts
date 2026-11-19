@@ -21,11 +21,12 @@ export const OWNER_TABS = [
   'stok',
   'riwayat',
   'rekap',
+  'pengeluaran',
+  'closing',
   'profil',
-  'ai_scan',
 ] as const;
 
-export const CASHIER_TABS = ['kasir', 'digital', 'stok', 'riwayat', 'profil'] as const;
+export const CASHIER_TABS = ['kasir', 'digital', 'stok', 'riwayat', 'rekap_karyawan', 'closing', 'profil'] as const;
 
 export function isValidPin(pin: string): boolean {
   const trimmed = pin.trim();
@@ -67,6 +68,10 @@ export function canManageInventoryAndSettings(mode: AppMode): boolean {
   return mode === 'owner';
 }
 
+export function canProcessReturnWithoutPin(mode: AppMode): boolean {
+  return mode === 'owner' || mode === 'cashier';
+}
+
 export function isValidRoleSettings(val: unknown): val is RoleSettings {
   if (typeof val !== 'object' || val === null || Array.isArray(val)) return false;
   const obj = val as Record<string, unknown>;
@@ -75,3 +80,23 @@ export function isValidRoleSettings(val: unknown): val is RoleSettings {
   const validName = typeof obj.cashierName === 'string';
   return validMode && validPin && validName;
 }
+
+/**
+ * Merges cloud role configuration into local role settings.
+ * Security PIN and store cashier configuration are synced, but active device mode
+ * ('owner' vs 'cashier') is strictly preserved to prevent cross-device mode hijacking.
+ */
+export function mergeCloudRoleSettings(
+  local: RoleSettings,
+  cloud: RoleSettings
+): RoleSettings {
+  return {
+    ...local,
+    ownerPin: typeof cloud?.ownerPin === 'string' && isValidPin(cloud.ownerPin) ? cloud.ownerPin : local.ownerPin,
+    cashierName: typeof cloud?.cashierName === 'string' && cloud.cashierName.trim()
+      ? cloud.cashierName
+      : local.cashierName,
+    mode: local.mode, // Active mode is strictly local to this device
+  };
+}
+

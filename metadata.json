@@ -1,6 +1,6 @@
 {
   "name": "Warung Pintar Pro",
-  "description": "Aplikasi Kasir POS & Inventori Toko Kelontong Cerdas dengan analisis foto produk Gemini AI, mode keteng eceran, transaksi PPOB digital, dan cetak struk.",
+  "description": "Aplikasi Kasir POS & Inventori Toko Kelontong dengan mode keteng eceran, transaksi PPOB digital, scan barcode, dan cetak struk.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

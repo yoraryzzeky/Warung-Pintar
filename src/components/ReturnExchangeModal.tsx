@@ -7,7 +7,6 @@ import {
   Plus,
   Minus,
   AlertTriangle,
-  Lock,
   CheckCircle,
   PackageCheck,
   PackageX,
@@ -23,13 +22,12 @@ import {
   type Transaction,
   type TransactionReturnAction,
 } from '../utils/storeLogic';
-import { verifyOwnerPin, type AppMode } from '../utils/roleMode';
+import { type AppMode } from '../utils/roleMode';
 
 interface ReturnExchangeModalProps {
   transaction: Transaction;
   products: Product[];
   appMode: AppMode;
-  ownerPin: string;
   cashierName: string;
   onApply: (result: {
     updatedProducts: Product[];
@@ -50,7 +48,6 @@ export const ReturnExchangeModal: React.FC<ReturnExchangeModalProps> = ({
   transaction,
   products,
   appMode,
-  ownerPin,
   cashierName,
   onApply,
   onClose,
@@ -67,7 +64,6 @@ export const ReturnExchangeModal: React.FC<ReturnExchangeModalProps> = ({
   const [productSearch, setProductSearch] = useState('');
   const [condition, setCondition] = useState<ReturnStockCondition>('GOOD');
   const [reason, setReason] = useState('Salah Beli');
-  const [pinInput, setPinInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const returnedItems = useMemo<CartItem[]>(() => {
@@ -176,10 +172,6 @@ export const ReturnExchangeModal: React.FC<ReturnExchangeModalProps> = ({
       setErrorMsg('Pilih minimal 1 barang pengganti untuk transaksi Tukar Barang.');
       return;
     }
-    if (appMode === 'cashier' && !verifyOwnerPin(pinInput, ownerPin)) {
-      setErrorMsg('PIN Owner salah. Di Mode Kasir, retur/pembatalan wajib disetujui Owner.');
-      return;
-    }
 
     const action: TransactionReturnAction =
       mode === 'EXCHANGE' ? 'EXCHANGE' : isReturningAllItems ? 'CANCEL' : 'PARTIAL_RETURN';
@@ -200,25 +192,25 @@ export const ReturnExchangeModal: React.FC<ReturnExchangeModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 z-[130] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 bg-black/70 z-[130] flex items-center justify-center p-2.5 sm:p-4 backdrop-blur-sm animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-label="Proses Retur Pembatalan atau Tukar Barang"
     >
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[92vh] overflow-y-auto p-6 space-y-5 shadow-2xl custom-scrollbar"
+        className="bg-white rounded-2xl sm:rounded-[2rem] w-full max-w-2xl max-h-[90dvh] overflow-y-auto p-3.5 sm:p-6 space-y-3.5 sm:space-y-5 shadow-2xl custom-scrollbar"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-              {mode === 'REFUND' ? <RotateCcw size={22} /> : <ArrowLeftRight size={22} />}
+        <div className="flex items-start justify-between gap-2.5 sm:gap-3 border-b border-gray-100 pb-3 sm:pb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              {mode === 'REFUND' ? <RotateCcw size={18} /> : <ArrowLeftRight size={18} />}
             </div>
             <div>
-              <h3 className="font-black text-sm md:text-base text-gray-800 uppercase">
+              <h3 className="font-black text-xs sm:text-sm md:text-base text-gray-800 uppercase">
                 Retur, Pembatalan &amp; Tukar Barang
               </h3>
-              <p className="text-[11px] font-bold text-gray-500 mt-0.5">
+              <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 mt-0.5">
                 Struk <span className="font-mono text-gray-800">{transaction.id}</span> •{' '}
                 {transaction.buyer || 'Pelanggan Umum'} • Total Awal{' '}
                 <span className="text-blue-600">{formatRp(transaction.totalAmount)}</span>
@@ -524,33 +516,6 @@ export const ReturnExchangeModal: React.FC<ReturnExchangeModalProps> = ({
             )}
           </div>
         </div>
-
-        {/* Owner PIN Authorization when in Cashier mode */}
-        {appMode === 'cashier' && (
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
-            <label
-              htmlFor="return-owner-pin"
-              className="text-[10px] font-black uppercase text-amber-900 flex items-center gap-1.5"
-            >
-              <Lock size={13} className="text-amber-700" />
-              <span>Otorisasi PIN Owner Diperlukan (Mode Karyawan Kasir)</span>
-            </label>
-            <input
-              id="return-owner-pin"
-              type="password"
-              inputMode="numeric"
-              maxLength={6}
-              value={pinInput}
-              onChange={(e) => {
-                setPinInput(e.target.value.replace(/\D/g, ''));
-                if (errorMsg) setErrorMsg(null);
-              }}
-              placeholder="Masukkan PIN Owner (4-6 digit)"
-              className="w-full p-3 bg-white border border-amber-300 rounded-xl font-mono font-black text-center tracking-[0.35em] text-sm outline-none focus:border-amber-600"
-              required
-            />
-          </div>
-        )}
 
         {errorMsg && (
           <div

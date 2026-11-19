@@ -1,8 +1,67 @@
 @import "tailwindcss";
 
+@custom-variant phone ([data-device="mobile"] &);
+@custom-variant phone-portrait ([data-layout-mode="mobile-portrait"] &);
+@custom-variant phone-landscape ([data-layout-mode="mobile-landscape"] &);
+@custom-variant tablet ([data-device="tablet"] &);
+
 :root {
   --wp-bg: #f8fafc;
+  --wp-root-font-size: 16px;
+  --wp-ui-scale: 1;
 }
+
+/* Pre-hydration CSS fallback before JS syncs data-device / data-layout-mode */
+@media (max-width: 639px) {
+  html {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 360px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  html {
+    font-size: 12px;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
 
 :root[data-theme="warung"] {
   --wp-bg: #fffaf5;

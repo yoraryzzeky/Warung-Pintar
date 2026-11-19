@@ -15,20 +15,23 @@ import {
   buildLast30DaysFinancialSeries,
   type Transaction,
   type DigitalTransaction,
+  type Expense,
 } from '../utils/storeLogic';
 
 interface OmsetProfitLineChartProps {
   transactions: Transaction[];
   digitalTransactions: DigitalTransaction[];
+  expenses?: Expense[];
 }
 
 export const OmsetProfitLineChart: React.FC<OmsetProfitLineChartProps> = ({
   transactions,
   digitalTransactions,
+  expenses = [],
 }) => {
   const chartData = useMemo(
-    () => buildLast30DaysFinancialSeries(transactions, digitalTransactions),
-    [transactions, digitalTransactions]
+    () => buildLast30DaysFinancialSeries(transactions, digitalTransactions, expenses),
+    [transactions, digitalTransactions, expenses]
   );
 
   const summary = useMemo(() => {
@@ -50,6 +53,12 @@ export const OmsetProfitLineChart: React.FC<OmsetProfitLineChartProps> = ({
             <span className="text-blue-300 font-medium">Total Omset</span>
             <span className="font-bold tabular-nums text-white">{formatRp(item.omset)}</span>
           </div>
+          {item.expenses > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-rose-300 font-medium">Biaya Toko</span>
+              <span className="font-bold tabular-nums text-rose-400">-{formatRp(item.expenses)}</span>
+            </div>
+          )}
           <div className="flex justify-between items-center">
             <span className="text-emerald-300 font-medium">Total Laba Bersih</span>
             <span className="font-bold tabular-nums text-emerald-400">{formatRp(item.laba)}</span>
@@ -67,41 +76,41 @@ export const OmsetProfitLineChart: React.FC<OmsetProfitLineChartProps> = ({
   return (
     <section
       aria-label="Grafik Perbandingan Omset dan Laba Bersih"
-      className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6"
+      className="bg-white rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-6 md:p-8 phone-landscape:p-3 border border-slate-200/80 shadow-sm space-y-3 sm:space-y-6 phone-landscape:space-y-2.5"
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0">
-            <TrendingUp size={20} />
+      <div className="flex flex-col sm:flex-row phone-landscape:flex-col justify-between items-start sm:items-center phone-landscape:items-start gap-2.5 sm:gap-4 border-b border-slate-100 pb-3 sm:pb-5 phone-landscape:pb-2.5">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 phone-landscape:w-7 phone-landscape:h-7 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+            <TrendingUp size={18} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight leading-snug">
               Perbandingan Omset vs Laba Bersih (30 Hari Terakhir)
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 phone-landscape:hidden">
               Pantau efisiensi margin keuntungan harian dari total omset toko
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 flex-wrap text-right">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap text-left sm:text-right phone-landscape:text-left">
           <div>
-            <span className="text-[11px] font-medium text-slate-400 block">Omset 30 Hari</span>
+            <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 block">Omset 30 Hari</span>
             <span className="text-xs sm:text-sm font-bold text-blue-600 tabular-nums">
               {formatRp(summary.totalOmset)}
             </span>
           </div>
-          <div className="h-7 w-px bg-slate-200 hidden sm:block" aria-hidden="true" />
+          <div className="h-6 w-px bg-slate-200 hidden sm:block phone-landscape:hidden" aria-hidden="true" />
           <div>
-            <span className="text-[11px] font-medium text-slate-400 block">Laba Bersih 30 Hari</span>
+            <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 block">Laba Bersih 30 Hari</span>
             <span className="text-xs sm:text-sm font-bold text-emerald-600 tabular-nums">
               {formatRp(summary.totalLaba)}
             </span>
           </div>
-          <div className="h-7 w-px bg-slate-200 hidden sm:block" aria-hidden="true" />
+          <div className="h-6 w-px bg-slate-200 hidden sm:block phone-landscape:hidden" aria-hidden="true" />
           <div>
-            <span className="text-[11px] font-medium text-slate-400 flex items-center justify-end gap-1">
-              <Percent size={11} /> Efisiensi Margin
+            <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 flex items-center sm:justify-end gap-1">
+              <Percent size={10} /> Efisiensi Margin
             </span>
             <span className="text-xs sm:text-sm font-bold text-slate-800 tabular-nums">
               {summary.overallMargin}%
@@ -110,7 +119,7 @@ export const OmsetProfitLineChart: React.FC<OmsetProfitLineChartProps> = ({
         </div>
       </div>
 
-      <div className="w-full h-72" data-testid="omset-profit-line-chart">
+      <div className="w-full h-44 sm:h-60 md:h-72 phone-landscape:h-36" data-testid="omset-profit-line-chart">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

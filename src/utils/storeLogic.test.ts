@@ -19,6 +19,7 @@ import {
   type CartItem,
   type Transaction,
   type DigitalTransaction,
+  type Expense,
 } from './storeLogic';
 
 test('formatRp formats Indonesian Rupiah properly', () => {
@@ -369,6 +370,97 @@ test('applyReturnOrExchange handles item exchange with price difference and dual
     'GOOD'
   );
   assert.equal(looseRestored[0].eceranStock, 7);
+});
+
+test('aggregateDailyRecap and buildLast30DaysFinancialSeries subtract expenses based on the day they occurred', () => {
+  const ref = new Date('2026-11-18T12:00:00');
+  const txs: Transaction[] = [
+    {
+      id: 'tx-day1',
+      date: '2026-11-17T09:00:00',
+      items: [],
+      totalAmount: 200000,
+      totalProfit: 50000,
+      status: 'LUNAS',
+      buyer: 'Umum',
+      cashPaid: 200000,
+      change: 0,
+    },
+    {
+      id: 'tx-day2',
+      date: '2026-11-18T10:00:00',
+      items: [],
+      totalAmount: 150000,
+      totalProfit: 40000,
+      status: 'LUNAS',
+      buyer: 'Umum',
+      cashPaid: 150000,
+      change: 0,
+    },
+  ];
+  const digitals: DigitalTransaction[] = [
+    {
+      id: 'dig-day2',
+      date: '2026-11-18T11:00:00',
+      serviceType: 'Token PLN',
+      provider: 'PLN',
+      targetNumber: '123456',
+      baseAmount: 50000,
+      fee: 3000,
+      sellAmount: 53000,
+      customer: 'Budi',
+      status: 'LUNAS',
+    },
+  ];
+  const expenses: Expense[] = [
+    {
+      id: 'exp-1',
+      date: '2026-11-18T14:00:00',
+      category: 'Listrik & Token',
+      description: 'Token Listrik Warung',
+      amount: 25000,
+      source: 'LACI_KAS',
+      handledBy: 'Owner',
+    },
+    {
+      id: 'exp-2',
+      date: '2026-11-18T16:00:00',
+      category: 'Transport & Bensin',
+      description: 'Bensin Belanja',
+      amount: 10000,
+      source: 'NON_TUNAI',
+      handledBy: 'Owner',
+    },
+  ];
+
+  const recap = aggregateDailyRecap(txs, digitals, '2026-11-17', '2026-11-18', expenses);
+  assert.equal(recap.length, 2);
+
+  // Day 2 (2026-11-18) comes first (descending)
+  const day2 = recap[0];
+  assert.equal(day2.date, '2026-11-18');
+  assert.equal(day2.expensesAmount, 35000);
+  assert.equal(day2.totalOmset, 150000 + 53000 - 35000); // 168000
+  assert.equal(day2.totalProfit, 40000 + 3000 - 35000); // 8000
+
+  // Day 1 (2026-11-17) has no expenses -> unchanged
+  const day1 = recap[1];
+  assert.equal(day1.date, '2026-11-17');
+  assert.equal(day1.expensesAmount, 0);
+  assert.equal(day1.totalOmset, 200000);
+  assert.equal(day1.totalProfit, 50000);
+
+  // Check 30-day series
+  const series = buildLast30DaysFinancialSeries(txs, digitals, expenses, ref);
+  assert.equal(series[28].date, '2026-11-17');
+  assert.equal(series[28].omset, 200000);
+  assert.equal(series[28].laba, 50000);
+  assert.equal(series[28].expenses, 0);
+
+  assert.equal(series[29].date, '2026-11-18');
+  assert.equal(series[29].omset, 168000);
+  assert.equal(series[29].laba, 8000);
+  assert.equal(series[29].expenses, 35000);
 });
 
 

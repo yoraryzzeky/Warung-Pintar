@@ -11,6 +11,7 @@ import {
   type DigitalTransaction,
   type Transaction,
 } from './storeLogic';
+import type { CashierClosingRecap } from './cashierClosing';
 
 export const THERMAL_LINE_WIDTH = 32;
 export const BLE_DEFAULT_CHUNK_SIZE = 100;
@@ -197,6 +198,81 @@ export function buildDigitalEscPosPayload(
   const footerLines = lines.slice(-1);
   const bodyLines = lines.slice(headerLines.length, -1);
   return encodeEscPosDocument(headerLines, bodyLines, footerLines, tx.id);
+}
+
+export interface ClosingPrintMeta {
+  periodLabel: string;
+  cashierName: string;
+  note?: string;
+}
+
+export function formatClosingEscPosLines(
+  recap: CashierClosingRecap,
+  profile: StorePrintProfile = {},
+  meta: ClosingPrintMeta = { periodLabel: 'Harian', cashierName: 'Karyawan Kasir' }
+): string[] {
+  const separator = '-'.repeat(THERMAL_LINE_WIDTH);
+  const lines: string[] = [];
+
+  lines.push(sanitizeAsciiText((profile.ownerName || 'WARUNG PINTAR').toUpperCase()));
+  if (profile.address) lines.push(sanitizeAsciiText(profile.address));
+  lines.push('REKAP & CLOSING KASIR');
+  lines.push(separator);
+  lines.push(formatTwoColumnLine('Periode:', meta.periodLabel));
+  lines.push(formatTwoColumnLine('Tgl:', `${recap.startDate || '-'} s/d ${recap.endDate || '-'}`));
+  lines.push(formatTwoColumnLine('Kasir:', meta.cashierName || 'Karyawan Kasir'));
+  lines.push(formatTwoColumnLine('Cetak:', formatDate(new Date().toISOString())));
+  lines.push(separator);
+  lines.push(formatTwoColumnLine('Omset Retail', formatRp(recap.retailSettledOmset)));
+  lines.push(formatTwoColumnLine('Omset PPOB', formatRp(recap.digitalOmset)));
+  if (recap.totalExpenses > 0) {
+    lines.push(formatTwoColumnLine('Biaya Toko', `-${formatRp(recap.totalExpenses)}`));
+  }
+  lines.push(formatTwoColumnLine('TOTAL OMSET', formatRp(recap.totalSettledOmset)));
+  lines.push(formatTwoColumnLine('Jml Tx Lunas', `${recap.totalSettledCount} Tx`));
+  lines.push(separator);
+  lines.push(formatTwoColumnLine('Tunai Masuk', formatRp(recap.cashTotal)));
+  if (recap.tarikTunaiDrawerCash > 0) {
+    lines.push(formatTwoColumnLine('Tarik Tunai', `-${formatRp(recap.tarikTunaiDrawerCash)}`));
+  }
+  if (recap.expenseDrawerCash > 0) {
+    lines.push(formatTwoColumnLine('Pengeluaran Tunai', `-${formatRp(recap.expenseDrawerCash)}`));
+  }
+  lines.push(formatTwoColumnLine('Uang Kas Tunai', formatRp(recap.expectedDrawerCash)));
+  lines.push(formatTwoColumnLine('Non-Tunai QRIS', formatRp(recap.qrisTotal)));
+  lines.push(formatTwoColumnLine(`Kasbon (${recap.kasbonCount} Tx)`, formatRp(recap.kasbonTotal)));
+  if (recap.cancelledCount > 0) {
+    lines.push(formatTwoColumnLine('Batal/Retur', `${recap.cancelledCount} Tx`));
+  }
+  if (recap.physicalCashCount !== null) {
+    lines.push(separator);
+    lines.push(formatTwoColumnLine('Kas Sistem', formatRp(recap.expectedDrawerCash)));
+    lines.push(formatTwoColumnLine('Kas Fisik', formatRp(recap.physicalCashCount)));
+    const variance = recap.cashVariance || 0;
+    const sign = variance > 0 ? '+' : '';
+    lines.push(formatTwoColumnLine('Selisih Kas', `${sign}${formatRp(variance)}`));
+  }
+  if (meta.note && meta.note.trim()) {
+    lines.push(separator);
+    lines.push(`Catatan: ${sanitizeAsciiText(meta.note)}`);
+  }
+  lines.push(separator);
+  lines.push('Closing Kasir Selesai');
+
+  return lines;
+}
+
+export function buildClosingEscPosPayload(
+  recap: CashierClosingRecap,
+  profile: StorePrintProfile = {},
+  meta: ClosingPrintMeta = { periodLabel: 'Harian', cashierName: 'Karyawan Kasir' }
+): Uint8Array {
+  const lines = formatClosingEscPosLines(recap, profile, meta);
+  const firstSep = lines.findIndex((l) => l.startsWith('---'));
+  const headerLines = firstSep > 0 ? lines.slice(0, firstSep) : lines.slice(0, 1);
+  const footerLines = lines.slice(-1);
+  const bodyLines = lines.slice(headerLines.length, -1);
+  return encodeEscPosDocument(headerLines, bodyLines, footerLines);
 }
 
 /**

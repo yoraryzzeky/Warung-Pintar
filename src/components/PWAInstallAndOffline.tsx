@@ -87,23 +87,23 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in"
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2.5 sm:p-4 animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-label="Panduan Pasang Aplikasi di Android dan iOS"
       data-testid="pwa-install-modal"
     >
-      <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-start gap-3 border-b border-slate-100 pb-3.5">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
-              <Smartphone size={20} />
+      <div className="w-full max-w-md phone-landscape:max-w-xl rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-3 sm:space-y-4 max-h-[90dvh] overflow-y-auto custom-scrollbar">
+        <div className="flex justify-between items-start gap-2.5 sm:gap-3 border-b border-slate-100 pb-2.5 sm:pb-3.5">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
+              <Smartphone size={18} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-black uppercase text-slate-900 leading-tight">
+              <h3 className="text-xs sm:text-sm font-black uppercase text-slate-900 leading-tight">
                 Pasang Aplikasi ke HP
               </h3>
-              <p className="text-[11px] font-semibold text-slate-500 mt-0.5">
+              <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 mt-0.5">
                 Akses langsung dari layar utama &amp; tetap jalan saat offline
               </p>
             </div>
@@ -113,7 +113,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Tutup panduan pasang aplikasi"
-            className="min-h-[40px] min-w-[40px] -mt-1 -mr-1 flex items-center justify-center hover:bg-slate-100 text-slate-500 rounded-xl transition-colors shrink-0"
+            className="min-h-[36px] min-w-[36px] sm:min-h-[40px] sm:min-w-[40px] -mt-1 -mr-1 flex items-center justify-center hover:bg-slate-100 text-slate-500 rounded-xl transition-colors shrink-0"
           >
             <X size={18} />
           </button>
@@ -319,13 +319,13 @@ export const PWAInstallButton: React.FC = () => {
         data-testid="pwa-install-btn"
         aria-label="Pasang aplikasi ke perangkat Android dan iOS"
         title="Pasang aplikasi di layar utama HP Android, iPhone, atau Komputer agar siap dipakai offline"
-        className="px-2.5 sm:px-3 py-2 min-h-[36px] bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] sm:text-xs font-black uppercase flex items-center gap-1.5 shadow-sm active:scale-95 transition-all whitespace-nowrap shrink-0"
+        className="px-2 sm:px-3 py-1.5 sm:py-2 phone-landscape:py-1 phone-landscape:px-2 min-h-[30px] sm:min-h-[36px] phone-landscape:min-h-[26px] bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-xl text-[9.5px] sm:text-xs font-black uppercase flex items-center gap-1 sm:gap-1.5 shadow-sm active:scale-95 transition-all whitespace-nowrap shrink-0"
       >
-        {action === 'native-prompt' ? <Download size={14} /> : <Smartphone size={14} />}
-        <span className="hidden sm:inline">
+        {action === 'native-prompt' ? <Download size={13} /> : <Smartphone size={13} />}
+        <span className="hidden sm:inline phone-landscape:hidden">
           {action === 'native-prompt' ? 'Pasang Aplikasi' : 'Pasang di HP'}
         </span>
-        <span className="sm:hidden">Install</span>
+        <span className="sm:hidden phone-landscape:inline">Install</span>
       </button>
 
       <InstallGuideModal
@@ -366,10 +366,10 @@ export const PWAInstallProfileCard: React.FC = () => {
 
   return (
     <>
-      <div className="bg-slate-50 p-5 rounded-3xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
-            <Smartphone size={20} />
+      <div className="bg-slate-50 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
+            <Smartphone size={18} />
           </div>
           <div>
             <h4 className="text-xs font-black text-gray-800 uppercase">

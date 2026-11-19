@@ -9,16 +9,18 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { TrendingUp, Calendar, ArrowUpRight } from 'lucide-react';
-import { formatRp, type Transaction, type DigitalTransaction } from '../utils/storeLogic';
+import { formatRp, type Transaction, type DigitalTransaction, type Expense } from '../utils/storeLogic';
 
 interface SalesTrendChartProps {
   transactions: Transaction[];
   digitalTransactions: DigitalTransaction[];
+  expenses?: Expense[];
 }
 
 export const SalesTrendChart: React.FC<SalesTrendChartProps> = ({
   transactions,
   digitalTransactions,
+  expenses = [],
 }) => {
   const chartData = useMemo(() => {
     const data = [];
@@ -33,9 +35,9 @@ export const SalesTrendChart: React.FC<SalesTrendChartProps> = ({
       const dateStr = `${yyyy}-${mm}-${dd}`;
       const dayLabel = `${d.getDate()} ${d.toLocaleDateString('id-ID', { month: 'short' })}`;
 
-      // Total retail sales (LUNAS)
+      // Total retail sales (LUNAS, non-cancelled)
       const retailOmset = transactions
-        .filter((t) => t.status === 'LUNAS' && t.date && t.date.startsWith(dateStr))
+        .filter((t) => t.status === 'LUNAS' && !t.isCancelled && t.date && t.date.startsWith(dateStr))
         .reduce((sum, t) => sum + (Number(t.totalAmount) || 0), 0);
 
       // Total digital transactions
@@ -43,7 +45,12 @@ export const SalesTrendChart: React.FC<SalesTrendChartProps> = ({
         .filter((t) => t.date && t.date.startsWith(dateStr))
         .reduce((sum, t) => sum + (Number(t.sellAmount) || 0), 0);
 
-      const totalOmset = retailOmset + digitalOmset;
+      // Total expenses on this day
+      const dayExpenses = (expenses || [])
+        .filter((e) => e.date && e.date.startsWith(dateStr))
+        .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+      const totalOmset = (retailOmset + digitalOmset) - dayExpenses;
 
       data.push({
         date: dateStr,
@@ -51,11 +58,12 @@ export const SalesTrendChart: React.FC<SalesTrendChartProps> = ({
         omset: totalOmset,
         retail: retailOmset,
         digital: digitalOmset,
+        expenses: dayExpenses,
       });
     }
 
     return data;
-  }, [transactions, digitalTransactions]);
+  }, [transactions, digitalTransactions, expenses]);
 
   const summary = useMemo(() => {
     const total = chartData.reduce((acc, cur) => acc + cur.omset, 0);
@@ -84,6 +92,12 @@ export const SalesTrendChart: React.FC<SalesTrendChartProps> = ({
             <span>Layanan Digital:</span>
             <span className="font-bold text-emerald-300">{formatRp(item.digital)}</span>
           </div>
+          {item.expenses > 0 && (
+            <div className="text-[9px] text-rose-300 flex justify-between">
+              <span>Biaya Toko:</span>
+              <span className="font-bold">-{formatRp(item.expenses)}</span>
+            </div>
+          )}
         </div>
       );
     }
@@ -91,49 +105,49 @@ export const SalesTrendChart: React.FC<SalesTrendChartProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-gray-100 shadow-sm space-y-6">
+    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-3.5 sm:p-6 md:p-8 phone-landscape:p-3 border border-gray-100 shadow-sm space-y-3 sm:space-y-6 phone-landscape:space-y-2.5">
       {/* Header and Summary stats */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-black shadow-sm">
-            <TrendingUp size={20} />
+      <div className="flex flex-col sm:flex-row phone-landscape:flex-col justify-between items-start sm:items-center phone-landscape:items-start gap-2.5 sm:gap-4 border-b border-gray-100 pb-3 sm:pb-5 phone-landscape:pb-2.5">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 phone-landscape:w-7 phone-landscape:h-7 bg-indigo-50 text-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center font-black shadow-sm shrink-0">
+            <TrendingUp size={18} />
           </div>
           <div>
-            <h3 className="text-sm font-black text-gray-800 uppercase tracking-tight flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-black text-gray-800 uppercase tracking-tight flex flex-wrap items-center gap-1.5 sm:gap-2">
               Tren Omset Penjualan Harian
-              <span className="bg-indigo-100 text-indigo-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                30 Hari Terakhir
+              <span className="bg-indigo-100 text-indigo-700 text-[8px] sm:text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
+                30 Hari
               </span>
             </h3>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider phone-landscape:hidden">
               Visualisasi performa pendapatan retail fisik dan transaksi digital warung
             </p>
           </div>
         </div>
 
         {/* 30-Day Highlight Metrics */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="bg-slate-50 px-3.5 py-2 rounded-2xl border border-gray-100 text-right">
-            <span className="text-[9px] font-bold text-gray-400 uppercase block">Total 30 Hari</span>
-            <span className="text-xs font-black text-indigo-600">{formatRp(summary.total)}</span>
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="bg-slate-50 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl border border-gray-100 text-left sm:text-right">
+            <span className="text-[8.5px] sm:text-[9px] font-bold text-gray-400 uppercase block">Total 30 Hari</span>
+            <span className="text-[11px] sm:text-xs font-black text-indigo-600 tabular-nums">{formatRp(summary.total)}</span>
           </div>
-          <div className="bg-slate-50 px-3.5 py-2 rounded-2xl border border-gray-100 text-right">
-            <span className="text-[9px] font-bold text-gray-400 uppercase block">Rata-rata / Hari</span>
-            <span className="text-xs font-black text-blue-600">{formatRp(summary.avg)}</span>
+          <div className="bg-slate-50 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl border border-gray-100 text-left sm:text-right">
+            <span className="text-[8.5px] sm:text-[9px] font-bold text-gray-400 uppercase block">Rata-rata / Hari</span>
+            <span className="text-[11px] sm:text-xs font-black text-blue-600 tabular-nums">{formatRp(summary.avg)}</span>
           </div>
           {summary.best && summary.best.omset > 0 && (
-            <div className="bg-emerald-50 px-3.5 py-2 rounded-2xl border border-emerald-100 text-right">
-              <span className="text-[9px] font-bold text-emerald-600 uppercase flex items-center gap-0.5 justify-end">
+            <div className="bg-emerald-50 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl border border-emerald-100 text-left sm:text-right">
+              <span className="text-[8.5px] sm:text-[9px] font-bold text-emerald-600 uppercase flex items-center gap-0.5 sm:justify-end">
                 <ArrowUpRight size={10} /> Rekor ({summary.best.label})
               </span>
-              <span className="text-xs font-black text-emerald-700">{formatRp(summary.best.omset)}</span>
+              <span className="text-[11px] sm:text-xs font-black text-emerald-700 tabular-nums">{formatRp(summary.best.omset)}</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Bar Chart Component */}
-      <div className="w-full h-72">
+      <div className="w-full h-44 sm:h-60 md:h-72 phone-landscape:h-36">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

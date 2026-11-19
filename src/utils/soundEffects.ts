@@ -1,6 +1,6 @@
 import type { PaymentMethodType } from './storeLogic';
 
-export type SoundKind = 'click' | 'success' | 'tunai' | 'qris' | 'kasbon';
+export type SoundKind = 'click' | 'success' | 'tunai' | 'qris' | 'kasbon' | 'notification';
 export type CheckoutSoundKind = 'tunai' | 'qris' | 'kasbon';
 
 export interface SoundToneStep {
@@ -18,6 +18,11 @@ const SOUND_PATTERNS: Record<SoundKind, readonly SoundToneStep[]> = {
   success: [
     { freq: 523.25, delaySec: 0, durationSec: 0.12, wave: 'triangle', volume: 0.12 },
     { freq: 659.25, delaySec: 0.08, durationSec: 0.18, wave: 'triangle', volume: 0.12 },
+  ],
+  // Notification: Chime 2 nada tinggi lembut sebagai bel notifikasi aktivitas kasir
+  notification: [
+    { freq: 880, delaySec: 0, durationSec: 0.12, wave: 'sine', volume: 0.14 },
+    { freq: 1174.66, delaySec: 0.1, durationSec: 0.22, wave: 'sine', volume: 0.15 },
   ],
   // Tunai: Efek bel laci kasir klasik "Cha-Ching!" (2 nada tinggi tajam & berdering)
   tunai: [

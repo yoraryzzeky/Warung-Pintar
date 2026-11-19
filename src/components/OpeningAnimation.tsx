@@ -81,7 +81,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.78, y: 28 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: prefersReducedMotion ? 0.2 : 0.72, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 flex flex-col items-center justify-center px-6 py-8 max-w-md w-full"
+            className="relative z-10 flex flex-col items-center justify-center px-4 py-4 sm:px-6 sm:py-8 phone-landscape:py-2 max-w-md w-full"
           >
             {/* Floating Hero Container tightly framed around the 3D Warung Pintar illustration */}
             <motion.div
@@ -100,7 +100,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({
               className="relative flex items-center justify-center"
             >
               {!imageError ? (
-                <div className="w-[310px] h-[250px] sm:w-[390px] sm:h-[305px] flex items-center justify-center overflow-hidden">
+                <div className="w-[210px] h-[168px] sm:w-[340px] sm:h-[268px] md:w-[390px] md:h-[305px] phone-landscape:w-[145px] phone-landscape:h-[115px] flex items-center justify-center overflow-hidden">
                   <img
                     src={OPENING_IMAGE_SRC}
                     alt="Warung Pintar Pro"
@@ -110,11 +110,11 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({
                   />
                 </div>
               ) : (
-                <div className="w-48 h-48 rounded-3xl bg-white border border-slate-200 shadow-xl flex flex-col items-center justify-center gap-3 p-6 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg">
-                    <Store size={32} />
+                <div className="w-36 h-36 sm:w-48 sm:h-48 phone-landscape:w-28 phone-landscape:h-28 rounded-3xl bg-white border border-slate-200 shadow-xl flex flex-col items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg">
+                    <Store size={28} />
                   </div>
-                  <p className="font-black text-lg text-slate-900 uppercase tracking-tight">
+                  <p className="font-black text-sm sm:text-lg text-slate-900 uppercase tracking-tight">
                     {storeName || 'Warung Pintar Pro'}
                   </p>
                 </div>
@@ -126,17 +126,17 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: prefersReducedMotion ? 0 : 0.28, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-2 flex flex-col items-center gap-1.5 w-full max-w-xs text-center"
+              className="mt-1.5 sm:mt-2 phone-landscape:mt-1 flex flex-col items-center gap-1 sm:gap-1.5 w-full max-w-xs text-center"
             >
-              <h2 className="text-sm sm:text-base font-black tracking-tight text-slate-800 uppercase truncate max-w-full">
+              <h2 className="text-xs sm:text-base font-black tracking-tight text-slate-800 uppercase truncate max-w-full">
                 {storeName || 'Warung Pintar Pro'}
               </h2>
-              <p className="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-400 uppercase">
+              <p className="text-[9px] sm:text-[11px] font-bold tracking-widest text-slate-400 uppercase">
                 Kasir Pintar &amp; Manajemen Toko
               </p>
 
               {/* Progress Bar (GPU-composited scaleX animation) */}
-              <div className="mt-2.5 w-48 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+              <div className="mt-1.5 sm:mt-2.5 phone-landscape:mt-1 w-40 sm:w-48 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
                 <motion.div
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
@@ -156,7 +156,7 @@ export const OpeningAnimation: React.FC<OpeningAnimationProps> = ({
             type="button"
             onClick={onComplete}
             aria-label="Lewati animasi pembuka"
-            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 px-4 py-2 min-h-[40px] rounded-xl bg-white/90 hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm text-xs font-black uppercase tracking-wide transition-all backdrop-blur-sm"
+            className="absolute top-3 right-3 sm:top-6 sm:right-6 phone-landscape:top-2.5 phone-landscape:right-3 z-20 px-3 py-1.5 sm:px-4 sm:py-2 min-h-[34px] sm:min-h-[40px] rounded-xl bg-white/90 hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm text-[11px] sm:text-xs font-black uppercase tracking-wide transition-all backdrop-blur-sm"
           >
             Lewati
           </button>
